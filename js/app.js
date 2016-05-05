@@ -27,6 +27,10 @@ var Museum = function ( data ) {
    this.long = ko.observable(data.long);
 };
 
+var Place = function ( data ){
+   this.name = ko.observable(data.name);
+}; 
+
 // View for list of museums
 var listView = function () {
 	var map;
@@ -37,14 +41,16 @@ var listView = function () {
 // app viewModel
 var viewModel = function () {
    var self = this;
-   var newYork = new google.maps.LatLng(40.7493, -73.6407);
+   self.newYork =  {lat: 40.7493, lng: -73.6407};
    //var newYork = {lat: -33.866, lng: 151.196};
-   this.museumList = ko.observableArray([]);
-
-   this.initMap = function () {
+   self.museumList = ko.observableArray([]);
+   self.placeList = ko.observableArray([]);
+   
+   var infowindow;
+   self.initMap = function () {
         map = new google.maps.Map(document.getElementById('map'), {
           mapTypeControl: true,
-          center: newYork,
+          center: self.newYork,
           zoom: 12,
           mapTypeControlOptions: {
               style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
@@ -64,10 +70,12 @@ var viewModel = function () {
 
        var service = new google.maps.places.PlacesService(map);
         service.nearbySearch({
-          location: newYork,
+          location: self.newYork,
           radius: 500,
-          type: ['store']
-        }, this.processResults);
+          type: ['museums']
+        }, self.processResults);
+
+        infowindow = new google.maps.InfoWindow();
    }
    // populate the array
    initialMuseums.forEach( function(museumItem) {
@@ -75,19 +83,19 @@ var viewModel = function () {
    });
    
    this.processResults = function (results, status, pagination) {
-   	console.log("Calling processResults!!!");
+   	
      if (status !== google.maps.places.PlacesServiceStatus.OK) {
         return;
      } else {
-       createMarkers(results);
+       self.createMarkers(results);
 
      }
    }
 
    this.createMarkers = function (places) {
-   	   console.log("Calling create markers!!!");
+   	   
        var bounds = new google.maps.LatLngBounds();
-       var placesList = document.getElementById('places');
+       //var placesList = document.getElementById('places');
 
        for (var i = 0, place; place = places[i]; i++) {
           var image = {
@@ -104,13 +112,49 @@ var viewModel = function () {
            title: place.name,
            position: place.geometry.location
        });
+       // Take the results of the search and push them into a ko array
+       places.forEach( function(placeItem) {
+          self.placeList.push( new Place(placeItem));
+       }); 
+      var contentString = '<div style="font-weight: bold">' + place.name + '</div>';
 
-    placesList.innerHTML += '<li>' + place.name + '</li>';
+      google.maps.event.addListener(marker, 'click', function() {      
+        infowindow.setContent(contentString);      
+        infowindow.open(map, this);
+        map.panTo(marker.position); 
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(function(){marker.setAnimation(null);}, 1450);
+      });
 
-    bounds.extend(place.geometry.location);
-  }
-  map.fitBounds(bounds);
-}
+     bounds.extend(place.geometry.location);
+     }
+     map.fitBounds(bounds);
+   }
+
+   /*
+  Function that will pan to the position and open an info window of an item clicked in the list.
+  */
+  self.clickMarker = function(place) {
+    var marker;
+
+    for(var e = 0; e < markersArray.length; e++) {      
+      if(place.place_id === markersArray[e].place_id) { 
+        marker = markersArray[e];
+        break; 
+      }
+    } 
+    //self.getFoursquareInfo(place);         
+    map.panTo(marker.position);   
+
+    // waits 300 milliseconds for the getFoursquare async function to finish
+    setTimeout(function() {
+      var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' 
+      infowindow.setContent(contentString);
+      infowindow.open(map, marker); 
+      marker.setAnimation(google.maps.Animation.DROP); 
+    }, 300);     
+  };
+
    google.maps.event.addDomListener(window, 'load', this.initMap);
 };
 
