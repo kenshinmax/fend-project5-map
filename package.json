@@ -1,0 +1,14 @@
+{
+  "name": "fend-project5-map",
+  "version": "1.0.0",
+  "description": "FEND Project 5 - Google Map project",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "knockout.js"
+  ],
+  "author": "Cliff Sanchez",
+  "license": "MIT"
+}

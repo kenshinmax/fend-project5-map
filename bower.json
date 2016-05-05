@@ -1,0 +1,23 @@
+{
+  "name": "fend-project5-map",
+  "description": "FEND Project 5 - Google Map project",
+  "main": "app.js",
+  "authors": [
+    "Cliff Sanchez"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "knockout.js"
+  ],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "knockout": "^3.4.0"
+  }
+}
