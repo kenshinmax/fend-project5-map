@@ -7,40 +7,28 @@
     <meta charset="utf-8">
    <!-- styling -->
    
-    <link rel="stylesheet" type="text/css" href="css/app.css" />
- <!-- Knockout.js -->
-    <script src="bower_components/knockout/dist/knockout.js"></script>
-   
-     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    
-     <script src="js/app.js"></script>
+    <link rel="stylesheet" href="css/app.css" />
+ 
   
-
-
-    <style>&callback=initMap
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      #map {
-        height: 100%;
-      }
-    </style>
     <link rel="stylesheet" href="css/app.css">
   </head>
   <body>
+     <input id="pac-input" class="controls" type="text" placeholder="Search Box">
      <div id="map"></div>
      <div id="right-panel">
          <h2>Results</h2>
          <ul id="places" data-bind="foreach: placeList">
            <li>
-             <span data-bind="text:name"></span>
+             <span data-bind="text:name, click:$parent.clickMarker"></span>
            </li>
          </ul>
          <button id="more">More results</button>
      </div>
-     
-       <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_h1zkWKDyioyAW3gxWPuf2lCYGhQbKjU&libraries=places"></script>
+     <script>function googleSuccess() {}</script>
+     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_h1zkWKDyioyAW3gxWPuf2lCYGhQbKjU&libraries=places&callback=googleSuccess"></script>
+       <!-- Knockout.js -->
+     <script src="bower_components/knockout/dist/knockout.js"></script>
+     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 
+     <script src="js/app.js"></script>
   </body>
 </html>
