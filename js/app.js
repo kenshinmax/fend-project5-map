@@ -45,7 +45,7 @@ var viewModel = function () {
       lng = latAndLng.lng(); 
    }
 
-   self.initMap = function () {
+   function initMap () {
         map = new google.maps.Map(document.getElementById('map'), {
           mapTypeControl: true,
           center: self.newYork,
@@ -76,7 +76,7 @@ var viewModel = function () {
 
         infowindow = new google.maps.InfoWindow();
         var list = (document.getElementById('right-panel'));
-        map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(list);
+        map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(list);
 
 
         // add the searchbox
@@ -105,6 +105,7 @@ var viewModel = function () {
           // Loop over the results of the search
           places.forEach(function(place) {
              self.createMarker(place);
+             map.fitBounds(bounds);
              //self.placeList.push( new Place(p))
           });
         
@@ -112,7 +113,7 @@ var viewModel = function () {
           var bounds = new google.maps.LatLngBounds();
           
           self.createMarkers(places);
-          map.fitBounds(bounds);
+          
           self.computeCenter();
         });
         google.maps.event.addListener(map, 'bounds_changed', function(){
@@ -120,21 +121,31 @@ var viewModel = function () {
          searchBox.setBounds(bounds);
         });   
 
+        // Handles an event where Google Maps taks too long to load
+       var timer = window.setTimeout(failedToLoad, 5000);
+         google.maps.event.addListener(map, 'tilesloaded', function() {
+         window.clearTimeout(timer);
+       });
+
+       // Will let the user know when Google Maps fails to load.
+        function failedToLoad() {
+         $('#map').html("Google Maps Failed to Load");
+        }
    };
-  // end if initMap()
+     // end if initMap()
    
-   this.processResults = function (results, status, pagination) {
+     this.processResults = function (results, status, pagination) {
    	
-     if (status !== google.maps.places.PlacesServiceStatus.OK) {
-        return;
-     } else {
-       self.createMarkers(results);
+      if (status !== google.maps.places.PlacesServiceStatus.OK) {
+         return;
+       } else {
+        self.createMarkers(results);
 
-     }
-   };
+       }
+     };
 
-   // Markers for the map.  Set the bounds for the map to fit each marker
-   this.createMarkers = function (places) {  
+      // Markers for the map.  Set the bounds for the map to fit each marker
+      this.createMarkers = function (places) {  
        var bounds = new google.maps.LatLngBounds();
        for (var i = 0, place; place = places[i]; i++) {
             bounds.extend(place.geometry.location);
@@ -147,12 +158,12 @@ var viewModel = function () {
        }); 
 
        map.fitBounds(bounds);
-   };
+     };
    
-  /*
-   *  Method to handle each marker creation and add the eventListener
-  */
-  self.createMarker = function (place) {
+     /*
+     *  Method to handle each marker creation and add the eventListener
+     */
+     self.createMarker = function (place) {
       
       var image = {
              url: place.icon,
@@ -180,12 +191,11 @@ var viewModel = function () {
        });
        self.markersArray.push(marker);
       
-  }  
+    }  
    /*
-  }
-  Function that will pan to the position and open an info window of an item clicked in the list.
-  */
-  self.clickMarker = function(place) {
+    Function that will pan to the position and open an info window of an item clicked in the list.
+   */
+   self.clickMarker = function(place) {
     var marker;
     
     for(var e = 0; e < self.markersArray.length; e++) {      
@@ -204,9 +214,9 @@ var viewModel = function () {
       infowindow.open(map, marker); 
       marker.setAnimation(google.maps.Animation.DROP); 
     }, 300);     
-  };
+   };
 
-   google.maps.event.addDomListener(window, 'load', this.initMap);
+   google.maps.event.addDomListener(window, 'load', initMap);
 };
 
 $(function(){

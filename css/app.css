@@ -9,25 +9,30 @@ body {
  height: 100%;
 }
 
-#right-panel {
- font-family: 'Roboto','sans-serif';
+.right-panel h2 {
+ font-family: "Roboto","sans-serif";
  line-height: 30px;
  padding-left: 10px;
 }
 
-#right-panel select, #right-panel input {
+.right-panel ul li {
+font-family: "Roboto","sans-serif";
+font-size: 12px;
+}
+
+.right-panel select, .right-panel input {
  font-size: 15px;
 }
 
-#right-panel select {
+.right-panel select {
  width: 100%;
 }
 
-#right-panel i {
+.right-panel i {
  font-size: 12px;
 }
 
-#right-panel {
+.right-panel {
  font-family: Arial, Helvetica, sans-serif;
  position: absolute;
  right: 5px;
@@ -74,7 +79,7 @@ li:nth-child(odd) {
 
 #pac-input {
  background-color: #fff;
- font-family: Roboto;
+ font-family: "Roboto";
  font-size: 15px;
  font-weight: 300;
  margin-left: 12px;
@@ -88,7 +93,7 @@ li:nth-child(odd) {
 }
 
 .pac-container {
- font-family: Roboto;
+ font-family: "Roboto";
 }
 
 .controls {
@@ -100,4 +105,20 @@ li:nth-child(odd) {
  height: 32px;
  outline: none;
  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+@media screen and (max-width: 400px) {
+    #pac-input {
+        width: 80%;
+    }
+    #pac-input:focus {
+        width: 81%;
+    }
+    .right-panel {
+      margin-top: 0%;
+      height: 30%;
+    }
+    ul {
+      height: 60%;
+    }
 }
