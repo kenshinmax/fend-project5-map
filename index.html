@@ -1,31 +1,24 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Simple Map</title>
-   
+    <title>Neighborhood Map</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
    <!-- styling -->
-   
     <link rel="stylesheet" href="css/app.css" />
- 
-  
-    <link rel="stylesheet" href="css/app.css">
   </head>
   <body>
-     <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+     <input id="pac-input" class="controls" type="text" placeholder="Search Box" data-bind="value: filterLetter, valueUpdate: 'afterkeydown'">
      <div id="map"></div>
      <div class="right-panel">
          <h2>Results</h2>
-         <ul id="places" data-bind="foreach: placeList">
+         <ul id="places" data-bind="foreach: filteredItems">
            <li>
-             <span data-bind="text:name, click:$parent.clickMarker"></span>
+             <span data-bind="text:name, click:$root.clickMarker"></span>
            </li>
          </ul>
-         <button id="more">More results</button>
      </div>
-     <script>function googleSuccess() {}</script>
-     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_h1zkWKDyioyAW3gxWPuf2lCYGhQbKjU&libraries=places&callback=googleSuccess"></script>
+     <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_h1zkWKDyioyAW3gxWPuf2lCYGhQbKjU&libraries=places&callback=initMap" onerror="failedToLoad()"></script>
        <!-- Knockout.js -->
      <script src="bower_components/knockout/dist/knockout.js"></script>
      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 
