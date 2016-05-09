@@ -1,18 +1,12 @@
 #Project 5 - Neighborhood Map
 
-## Installation
-This project uses Bower to include Knockout.
+##Frameworks and libraries
+* KnockoutJS v3.4.0
+* jQuery v2.2.3
 
-Install npm
-[Docs for install](https://docs.npmjs.com/cli/install "npm install docs")
+## Dependencies
+See the package.json file for a list of all dependencies not included in the repo. Dependencies can be installed with npm install.
 
-Install Bower
-[Docs for install](http://bower.io/#install-bower "Bower install documentation")
-
-Install Knockout
-```
-bower install knockout --save-dev
-```
 
 link: http://kenshinmax.github.io/fend-project5-map/index.html
 

@@ -98,8 +98,8 @@ var viewModel = function () {
     infowindow.setContent(contentString);      
     infowindow.open(map, this);
     map.panTo(data.geometry.location); 
-    this.marker.setAnimation(google.maps.Animation.BOUNCE);
-    setTimeout(function(){this.marker.setAnimation(null);}, 1450);
+    //this.marker.setAnimation(google.maps.Animation.BOUNCE);
+    //setTimeout(function(){this.marker.setAnimation(null);}, 1450);
    }); 
   }; 
 
