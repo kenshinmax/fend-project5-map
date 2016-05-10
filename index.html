@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="css/app.css" />
   </head>
   <body>
-     <input id="pac-input" class="controls" type="text" placeholder="Search Box" data-bind="value: filterLetter, valueUpdate: 'afterkeydown'">
+     <input id="pac-input" class="controls" type="text" placeholder="Search Box" data-bind="value: self.filterLetter, valueUpdate: 'afterkeydown'">
      <div id="map"></div>
      <div class="right-panel">
          <h2>Results</h2>
-         <ul id="places" data-bind="foreach: filteredItems">
+         <ul id="places" data-bind="foreach: self.filteredItems">
            <li>
-             <span data-bind="text:name, click:$root.clickMarker"></span>
+             <span data-bind="text:name, click: clickMarker"></span>
            </li>
          </ul>
      </div>

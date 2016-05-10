@@ -8,6 +8,10 @@ var lng;
 var newYork =  {lat: 40.7493, lng: -73.6407};
 var markersArray = [];
 
+var self = this;
+self.filterLetter = ko.observable();
+self.placeList = ko.observableArray();
+
 // google callback funciton to get things started
 function initMap () {
 
@@ -43,13 +47,14 @@ function initMap () {
    var searchBox = new google.maps.places.SearchBox(input);
         
    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+  
   // set up
- ko.applyBindings(new viewModel());
+  ko.applyBindings(new viewModel());
   getInitialPlaces();
   computeCenter();
-  
  
 }
+
 // end if initMap()
 
  // Will let the user know when Google Maps fails to load.
@@ -67,9 +72,7 @@ function computeCenter() {
 
 // app viewModel
 var viewModel = function () {
-   var self = this;
-   self.filterLetter = ko.observable();
-   self.placeList = ko.observableArray([]);
+  
 
    // string to hold foursquare information
    self.foursquareInfo = '';
@@ -79,13 +82,13 @@ var viewModel = function () {
     var filter = self.filterLetter();
     
     if (!filter) {
-      return ko.utils.arrayFilter(self.placeList, function(item) {
+      return ko.utils.arrayFilter(self.placeList(), function(item) {
         item.marker.setVisible(true);
         return true;
       });
     }
 
-    return ko.utils.arrayFilter(self.placeList, function(item) {
+    return ko.utils.arrayFilter(self.placeList(), function(item) {
       if (item.name.toLowerCase().indexOf(filter) === 0) {
         return true;
       } else {
@@ -94,7 +97,7 @@ var viewModel = function () {
       };
     });
 
-    }, this);
+    }, self);
  };
  // end of viewModel
        
@@ -126,15 +129,17 @@ var Place = function ( data ){
      this.name = data.name;
      this.location = data.geometry.location;
      this.id = data.place_id;
+
+     this.marker = createMarker(data);
 }
 // Markers for the map.  Set the bounds for the map to fit each marker
 function createMarkers (places) {  
     bounds = new google.maps.LatLngBounds();
     
     places.forEach(function (place){
-        place.marker = createMarker(place);
+       
         self.placeList.push(new Place(place));
-        //debugger;    
+        
         bounds.extend(new google.maps.LatLng(
           place.geometry.location.lat(),
           place.geometry.location.lng()));
@@ -190,9 +195,9 @@ function createMarkers (places) {
   self.clickMarker = function (place) {
     var _place;
    
-    for(var e = 0; e < self.placeList.length; e++) {      
-      if(place.id === self.placeList[e].id) { 
-        _place = self.placeList[e];
+    for(var e = 0; e < self.placeList().length; e++) {      
+      if(place.id === self.placeList()[e].id) { 
+        _place = self.placeList()[e];
         break; 
       }
     }
@@ -203,8 +208,8 @@ function createMarkers (places) {
     setTimeout(function() {
       var contentString = '<div style="font-weight: bold">' + _place.name + '</div>' + self.foursquareInfo;
       infowindow.setContent(contentString);
-      infowindow.open(map, this.marker); 
-      this.marker.setAnimation(google.maps.Animation.DROP); 
+      infowindow.open(map, _place.marker); 
+      _place.marker.setAnimation(google.maps.Animation.DROP); 
     }, 300);     
   };
 

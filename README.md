@@ -4,9 +4,6 @@
 * KnockoutJS v3.4.0
 * jQuery v2.2.3
 
-## Dependencies
-See the package.json file for a list of all dependencies not included in the repo. Dependencies can be installed with npm install.
-
 
 link: http://kenshinmax.github.io/fend-project5-map/index.html
 
