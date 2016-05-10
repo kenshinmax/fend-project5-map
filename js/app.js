@@ -6,7 +6,7 @@ var service;
 var lat;
 var lng;
 var newYork =  {lat: 40.7493, lng: -73.6407};
-
+var markersArray = [];
 
 // google callback funciton to get things started
 function initMap () {
@@ -32,8 +32,23 @@ function initMap () {
    fullscreenControl: true
   });
   
+  infowindow = new google.maps.InfoWindow();
+   var list = (document.getElementById('right-panel'));
+   map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(list);
+
+
+   // add the searchbox
+   // Create the search box and link it to the UI element.
+   var input = document.getElementById('pac-input');
+   var searchBox = new google.maps.places.SearchBox(input);
+        
+   map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+  // set up
+ ko.applyBindings(new viewModel());
+  getInitialPlaces();
+  computeCenter();
   
-  ko.applyBindings(new viewModel());
+ 
 }
 // end if initMap()
 
@@ -54,56 +69,37 @@ function computeCenter() {
 var viewModel = function () {
    var self = this;
    self.filterLetter = ko.observable();
-   self.placeList = [];
-   self.markersArray = [];
+   self.placeList = ko.observableArray([]);
+
    // string to hold foursquare information
    self.foursquareInfo = '';
-   // Plot the list of initial places
-   getInitialPlaces();
 
-   computeCenter();
+ // function to filter KO seach box and markers
+  self.filteredItems = ko.computed(function() {
+    var filter = self.filterLetter();
+    
+    if (!filter) {
+      return ko.utils.arrayFilter(self.placeList, function(item) {
+        item.marker.setVisible(true);
+        return true;
+      });
+    }
 
-   infowindow = new google.maps.InfoWindow();
-   var list = (document.getElementById('right-panel'));
-   map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(list);
+    return ko.utils.arrayFilter(self.placeList, function(item) {
+      if (item.name.toLowerCase().indexOf(filter) === 0) {
+        return true;
+      } else {
+        item.marker.setVisible(false);
+        return false;
+      };
+    });
 
+    }, this);
+ };
+ // end of viewModel
+       
 
-   // add the searchbox
-   // Create the search box and link it to the UI element.
-   var input = document.getElementById('pac-input');
-   var searchBox = new google.maps.places.SearchBox(input);
-        
-   map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-   
-   // Object to represent data
-   var Place = function ( data ){
-   this.name = data.name;
-   this.location = data.geometry.location;
-   this.id = data.place_id;
-   var image = {
-             url: data.icon,    
-             scaledSize: new google.maps.Size(25, 25)
-           };
-   this.marker = new google.maps.Marker({
-    position: data.geometry.location,
-    title: this.name,
-    icon: image,
-    map: map,
-    animation: google.maps.Animation.DROP
-   });
-
-   var contentString = '<div style="font-weight: bold">' + data.name + '</div>' + self.foursquareInfo;
- 
-   google.maps.event.addListener(this.marker, 'click', function() {      
-    infowindow.setContent(contentString);      
-    infowindow.open(map, this);
-    map.panTo(data.geometry.location); 
-    //this.marker.setAnimation(google.maps.Animation.BOUNCE);
-    //setTimeout(function(){this.marker.setAnimation(null);}, 1450);
-   }); 
-  }; 
-
-  function getInitialPlaces() {
+function getInitialPlaces() {
        var request = {
          location: newYork,
         radius: 600,
@@ -118,30 +114,76 @@ var viewModel = function () {
   }  
 
   // manage results and create markers 
-  function processResults (results, status, pagination) {  	  
+function processResults (results, status, pagination) {  	  
       if (status !== google.maps.places.PlacesServiceStatus.OK) {
          return;
        } else {
          createMarkers(results);
        }
-  }
+}
+// Object to represent data
+var Place = function ( data ){
+     this.name = data.name;
+     this.location = data.geometry.location;
+     this.id = data.place_id;
+}
+// Markers for the map.  Set the bounds for the map to fit each marker
+function createMarkers (places) {  
+    bounds = new google.maps.LatLngBounds();
+    
+    places.forEach(function (place){
+        place.marker = createMarker(place);
+        self.placeList.push(new Place(place));
+        //debugger;    
+        bounds.extend(new google.maps.LatLng(
+          place.geometry.location.lat(),
+          place.geometry.location.lng()));
+    });  
 
-  // Markers for the map.  Set the bounds for the map to fit each marker
-  function createMarkers (places) {  
-
-    var bounds = new google.maps.LatLngBounds();
-    for (var i = 0, place; place = places[i]; i++) {
-        bounds.extend(place.geometry.location);
-     }
-      
+    // adjust map
+    map.fitBounds(bounds);
+    
     // Take the results of the search and push them into a ko array
-    self.placeList = ko.utils.arrayMap(places, function(item) {
-      return new Place(item);
-    });
-         
-     map.fitBounds(bounds);
+    //self.placeList = ko.utils.arrayMap(places, function(item) {
+     // return new Place(item);
+    //});
+
+    
   }
      
+     /*
+  Function to create a marker at each place.  This is called on load of the map with the pre-populated list, and also after each search.  Also sets the content of each place's infowindow.
+  */
+  function createMarker(place) {
+    var marker = new google.maps.Marker({
+      map: map,
+      icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+      name: place.name.toLowerCase(),
+      position: place.geometry.location,
+      place_id: place.place_id,
+      animation: google.maps.Animation.DROP
+    });    
+    var address;
+    if (place.vicinity !== undefined) {
+      address = place.vicinity;
+    } else if (place.formatted_address !== undefined) {
+      address = place.formatted_address;
+    }       
+    var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + address + '</div>' + self.foursquareInfo ;
+
+    google.maps.event.addListener(marker, 'click', function() {      
+      infowindow.setContent(contentString);      
+      infowindow.open(map, this);
+      map.panTo(marker.position); 
+      marker.setAnimation(google.maps.Animation.BOUNCE);
+      setTimeout(function(){marker.setAnimation(null);}, 1450);
+    });
+
+    markersArray.push(marker);
+
+    return marker;
+  }
+
   /*
     Function that will pan to the position and open an info window of an item clicked in the list.
   */
@@ -156,31 +198,16 @@ var viewModel = function () {
     }
     self.getFoursquareInfo(_place);
     map.panTo(_place.marker.position);   
-
+ 
+ // waits 300 milliseconds for the getFoursquare async function to finish
+    setTimeout(function() {
+      var contentString = '<div style="font-weight: bold">' + _place.name + '</div>' + self.foursquareInfo;
+      infowindow.setContent(contentString);
+      infowindow.open(map, this.marker); 
+      this.marker.setAnimation(google.maps.Animation.DROP); 
+    }, 300);     
   };
-   
-  // function to filter KO seach box and markers
-  self.filteredItems = ko.computed(function() {
-    var filter = self.filterLetter();
-    
-    if (!filter) {
-      return ko.utils.arrayFilter(self.placeList, function(item) {
-        item.marker.setVisible(true);
-        return true;
-      });
-    }
 
-    return ko.utils.arrayFilter(self.placeList, function(item) {
-      if (item.name.toLowerCase().indexOf(filter) === 0) {
-        return true
-      } else {
-        item.marker.setVisible(false);
-        return false
-      };
-    });
-
-  }, this);
-  
   // Foursquare Credentials
   var clientID = 'N0WMOXAOMVUA0DE54FKXEVNKMOJQ02YDNFSFNEXKTEKYGB2G';
   var clientSecret = '33DZIX5ZKDQQF1L0R3ATMQKPT3YX5BELITTVBWSFMKZS3QM2';
@@ -216,5 +243,4 @@ var viewModel = function () {
                   twitterId + '<br>';
             } 
       });
-  };  
-};
+  };
