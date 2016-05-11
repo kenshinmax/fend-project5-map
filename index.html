@@ -8,21 +8,23 @@
     <link rel="stylesheet" href="css/app.css" />
   </head>
   <body>
-     <input id="pac-input" class="controls" type="text" placeholder="Search Box" data-bind="value: self.filterLetter, valueUpdate: 'afterkeydown'">
+     <input id="pac-input" class="controls" type="text" placeholder="Search Box" data-bind="value: filterLetter, valueUpdate: 'afterkeydown'">
+     <span id="message" data-bind"text: self.message"></span>
      <div id="map"></div>
      <div class="right-panel">
          <h2>Results</h2>
-         <ul id="places" data-bind="foreach: self.filteredItems">
+         <ul id="places" data-bind="foreach: filteredItems">
            <li>
-             <span data-bind="text:name, click: clickMarker"></span>
+             <span data-bind="text:name, click: $root.clickMarker"></span>
            </li>
          </ul>
      </div>
-     
+     <script src="js/lib/knockout-3.2.0.js"></script>
+     <script src="js/app.js"></script>
      <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_h1zkWKDyioyAW3gxWPuf2lCYGhQbKjU&libraries=places&callback=initMap" onerror="failedToLoad()"></script>
        <!-- Knockout.js -->
-     <script src="js/lib/knockout-3.2.0.js"></script>
+     
      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>     
-     <script src="js/app.js"></script>
+    
   </body>
 </html>
