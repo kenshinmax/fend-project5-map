@@ -147,8 +147,8 @@ var Place = function ( data ){
     } else if (place.formatted_address !== undefined) {
       address = place.formatted_address;
     }       
-    place.foursquareInfo = foursquareInfo(place);
-    var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + address + '</div>' + place.foursquareInfo;
+    //self.getFoursquareInfo(place);
+    var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + address + '</div>';
 
     google.maps.event.addListener(marker, 'click', function() {      
       infowindow.setContent(contentString);      
@@ -194,16 +194,55 @@ var Place = function ( data ){
         break; 
       }
     }
-    //self.getFoursquareInfo(_place);
+    self.getFoursquareInfo(_place);
     map.panTo(_place.marker.position);   
  
  // waits 300 milliseconds for the getFoursquare async function to finish
     setTimeout(function() {
-      var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + place.address + '</div>' + place.foursquareInfo;
+      var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + place.address + '</div>' + self.foursquareInfo;
       infowindow.setContent(contentString);
       infowindow.open(map, _place.marker); 
       _place.marker.setAnimation(google.maps.Animation.DROP); 
     }, 300);     
+  };
+
+  // Foursquare Credentials
+  var clientID = 'N0WMOXAOMVUA0DE54FKXEVNKMOJQ02YDNFSFNEXKTEKYGB2G';
+  var clientSecret = '33DZIX5ZKDQQF1L0R3ATMQKPT3YX5BELITTVBWSFMKZS3QM2';
+
+  self.getFoursquareInfo = function (point) {
+    // creats our foursquare URL
+    var foursquareURL = 'https://api.foursquare.com/v2/venues/search?client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20130815' + '&ll=' +lat+ ',' +lng+ '&query=\'' +point.name +'\'&limit=1';
+
+    $.getJSON(foursquareURL)
+      .done(function(response) {
+        self.foursquareInfo = '<p>Foursquare:<br>';
+        var venue = response.response.venues[0];         
+        // Name       
+        var venueName = venue.name;
+            if (venueName !== null && venueName !== undefined) {
+                  self.foursquareInfo += 'Name: ' +
+                   venueName + '<br>';
+            } else {
+                  self.foursquareInfo += 'Name: Not Found';
+            }   
+        // Phone Number     
+        var phoneNum = venue.contact.formattedPhone;
+            if (phoneNum !== null && phoneNum !== undefined) {
+                self.foursquareInfo += 'Phone: ' +
+                  phoneNum + '<br>';
+            } else {
+                self.foursquareInfo += 'Phone: Not Found';
+            }
+        // Twitter
+        var twitterId = venue.contact.twitter;
+            if (twitterId !== null && twitterId !== undefined) {
+                self.foursquareInfo += 'twitter: @' +
+                  twitterId + '<br>';
+            }
+      }).fail(function(){
+        alert("There was an error connecting to Foursquare");
+      });
   };
   getInitialPlaces();
 };
@@ -211,44 +250,4 @@ var Place = function ( data ){
       
   
 
-  // Foursquare Credentials
-  var clientID = 'N0WMOXAOMVUA0DE54FKXEVNKMOJQ02YDNFSFNEXKTEKYGB2G';
-  var clientSecret = '33DZIX5ZKDQQF1L0R3ATMQKPT3YX5BELITTVBWSFMKZS3QM2';
 
-  self.foursquareInfo = function (point) {
-    // creats our foursquare URL
-    var foursquareURL = 'https://api.foursquare.com/v2/venues/search?client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20130815' + '&ll=' +lat+ ',' +lng+ '&query=\'' +point.name +'\'&limit=1';
-    var squareInfo = 'No Foursquare Info available..';
-
-    $.getJSON(foursquareURL)
-      .done(function(response) {
-        squareInfo = '<p>Foursquare:<br>';
-        var venue = response.response.venues[0];         
-        // Name       
-        var venueName = venue.name;
-            if (venueName !== null && venueName !== undefined) {
-                squareInfo += 'Name: ' +
-                  venueName + '<br>';
-            } else {
-                 squareInfo += 'Name: Not Found';
-            }   
-        // Phone Number     
-        var phoneNum = venue.contact.formattedPhone;
-            if (phoneNum !== null && phoneNum !== undefined) {
-                squareInfo += 'Phone: ' +
-                  phoneNum + '<br>';
-            } else {
-                squareInfo += 'Phone: Not Found';
-            }
-        // Twitter
-        var twitterId = venue.contact.twitter;
-            if (twitterId !== null && twitterId !== undefined) {
-                squareInfo += 'twitter: @' +
-                  twitterId + '<br>';
-            }
-
-            return squareInfo; 
-      });
-
-      return squareInfo;
-  };
