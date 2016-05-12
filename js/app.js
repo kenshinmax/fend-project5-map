@@ -102,6 +102,7 @@ var viewModel = function () {
 
     return ko.utils.arrayFilter(self.placeList(), function(item) {
       if (item.name.toLowerCase().indexOf(filter) >-1) {
+        item.marker.setVisible(true);
         return true;
       } else {
         item.marker.setVisible(false);
