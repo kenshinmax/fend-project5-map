@@ -59,7 +59,7 @@ function initMap () {
  // Will let the user know when Google Maps fails to load.
 function failedToLoad() {
    //$('#map').html("Google Maps Failed to Load");
-   self.message = "Google Maps Failed to Load";
+   alert("Google Maps Failed to Load");
 }
 
 // Finds the center of the map to get lat and lng values
@@ -74,22 +74,22 @@ function computeCenter() {
 var viewModel = function () {
   var self = this;
 
-// Object to represent data
-var Place = function ( data ){
+  // Object to represent data
+  var Place = function ( data ){
      this.name = data.name;
      this.location = data.geometry.location;
-     this.id = data.place_id;
+     this.place_id = data.place_id;
      this.address = data.vicinity;
 
      this.marker = self.createMarker(data);
-};
- // string to hold foursquare information
+  };
+  
+  // string to hold foursquare information
   self.foursquareInfo = '';
   self.filterLetter = ko.observable();
   self.placeList = ko.observableArray();
-  self.message = ko.observable();
   
- // function to filter KO seach box and markers
+  // function to filter KO seach box and markers
   self.filteredItems = ko.computed(function() {
     var filter = self.filterLetter();
     
@@ -101,7 +101,7 @@ var Place = function ( data ){
     }
 
     return ko.utils.arrayFilter(self.placeList(), function(item) {
-      if (item.name.toLowerCase().indexOf(filter) === 0) {
+      if (item.name.toLowerCase().indexOf(filter) >-1) {
         return true;
       } else {
         item.marker.setVisible(false);
@@ -109,7 +109,7 @@ var Place = function ( data ){
       }
     });
 
-    }, self);
+  }, self);
 
   // Markers for the map.  Set the bounds for the map to fit each marker
   self.createMarkers = function (places) {  
@@ -126,7 +126,7 @@ var Place = function ( data ){
 
     // adjust map
     map.fitBounds(bounds);
-  }
+  };
 
 
      /*
@@ -147,19 +147,13 @@ var Place = function ( data ){
     } else if (place.formatted_address !== undefined) {
       address = place.formatted_address;
     }       
-    //self.getFoursquareInfo(place);
-    var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + address + '</div>';
-
-    google.maps.event.addListener(marker, 'click', function() {      
-      infowindow.setContent(contentString);      
-      infowindow.open(map, this);
-      map.panTo(marker.position); 
-      marker.setAnimation(google.maps.Animation.BOUNCE);
-      setTimeout(function(){marker.setAnimation(null);}, 1450);
+   
+    google.maps.event.addListener(marker, 'click', function() { 
+      self.clickMarker(place);
     });
 
     return marker;
-  }
+  };
   function getInitialPlaces() {
        var request = {
          location: newYork,
@@ -188,8 +182,9 @@ var Place = function ( data ){
   self.clickMarker = function (place) {
     var _place;
    
-    for(var e = 0; e < self.placeList().length; e++) {      
-      if(place.id === self.placeList()[e].id) { 
+    for(var e = 0; e < self.placeList().length; e++) {     
+      if(place.place_id === self.placeList()[e].place_id) { 
+
         _place = self.placeList()[e];
         break; 
       }
@@ -197,12 +192,9 @@ var Place = function ( data ){
     self.getFoursquareInfo(_place);
     map.panTo(_place.marker.position);   
  
- // waits 300 milliseconds for the getFoursquare async function to finish
+    // waits 300 milliseconds for the getFoursquare async function to finish
     setTimeout(function() {
-      var contentString = '<div style="font-weight: bold">' + place.name + '</div><div>' + place.address + '</div>' + self.foursquareInfo;
-      infowindow.setContent(contentString);
-      infowindow.open(map, _place.marker); 
-      _place.marker.setAnimation(google.maps.Animation.DROP); 
+    // not doing much here..
     }, 300);     
   };
 
@@ -240,6 +232,11 @@ var Place = function ( data ){
                 self.foursquareInfo += 'twitter: @' +
                   twitterId + '<br>';
             }
+
+        var contentString = '<div style="font-weight: bold">' + point.name + '</div><div>' + point.address + '</div>' + self.foursquareInfo;
+        infowindow.setContent(contentString);
+        infowindow.open(map, point.marker);         
+
       }).fail(function(){
         alert("There was an error connecting to Foursquare");
       });
